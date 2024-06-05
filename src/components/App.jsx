@@ -6,6 +6,8 @@ import css from './App.module.css';
 import SearchBox from './SearchBox/SearchBox';
 import ContactForm from './ContactForm/ContactForm';
 import { fetchContacts } from '../redux/contactsOps';
+import Loader from './Loader/Loader';
+import ErrorMessage from './ErrorMessage/ErrorMessage';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -21,8 +23,8 @@ export default function App() {
       <h1>Phonebook</h1>
       <ContactForm />
       <SearchBox />
-      {/* {isLoading && <Loader>Loading message</Loader>}
-      {isError && <Error>Error message</Error>} */}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
       <ContactList />
     </div>
   );

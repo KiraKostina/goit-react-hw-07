@@ -1,5 +1,15 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { fetchContacts, addContact, deleteContact } from './contactsOps';
+import { selectNameFilter } from './filtersSlice';
+
+const handlePending = state => {
+  state.isLoading = true;
+};
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+};
 
 const contactsSlice = createSlice({
   name: 'contacts',
@@ -10,61 +20,38 @@ const contactsSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(fetchContacts.pending, state => {
-        state.error = false;
-        state.loading = true;
-      })
+      .addCase(fetchContacts.pending, handlePending)
       .addCase(fetchContacts.fulfilled, (state, action) => {
         state.items = action.payload;
         state.loading = false;
       })
-      .addCase(fetchContacts.rejected, state => {
-        state.loading = false;
-        state.error = true;
-      })
-      .addCase(addContact.pending, state => {
-        state.error = false;
-        state.loading = true;
-      })
+      .addCase(fetchContacts.rejected, handleRejected)
+      .addCase(addContact.pending, handlePending)
       .addCase(addContact.fulfilled, (state, action) => {
         state.items.push(action.payload);
         state.loading = false;
       })
-      .addCase(addContact.rejected, state => {
-        state.loading = false;
-        state.error = true;
-      })
+      .addCase(addContact.rejected, handleRejected)
+      .addCase(deleteContact.pending, handlePending)
       .addCase(deleteContact.fulfilled, (state, action) => {
         const index = state.items.findIndex(
           contact => contact.id === action.payload
         );
         state.items.splice(index, 1);
         state.loading = false;
-      });
+      })
+      .addCase(deleteContact.rejected, handleRejected);
   },
-  // reducers: {
-  //   addContact: {
-  //     reducer(state, action) {
-  //       state.items.push(action.payload);
-  //     },
-  //     prepare(name, number) {
-  //       return {
-  //         payload: {
-  //           id: nanoid(),
-  //           name,
-  //           number,
-  //         },
-  //       };
-  //     },
-  //   },
-  //   deleteContact(state, action) {
-  //     const index = state.items.findIndex(
-  //       contact => contact.id === action.payload
-  //     );
-  //     state.items.splice(index, 1);
-  //   },
-  // },
 });
 
 export const contactsReducer = contactsSlice.reducer;
 export const selectContacts = state => state.contacts.items;
+
+export const selectFilteredContacts = createSelector(
+  [selectContacts, selectNameFilter],
+  (contacts, filter) => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+);

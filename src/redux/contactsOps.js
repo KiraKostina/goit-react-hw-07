@@ -38,5 +38,3 @@ export const deleteContact = createAsyncThunk(
     }
   }
 );
-
-// https://666018415425580055b224e4.mockapi.io/contacts
